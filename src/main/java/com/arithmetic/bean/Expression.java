@@ -25,32 +25,29 @@ public class Expression {
         this.value = null;
         this.operatorCount = left.operatorCount + right.operatorCount + 1;
     }
-
-    // 生成规范字符串（去重关键）
-    public String getCanonicalForm() {
-        if(isLeaf()){
-            return value.toString();
-        }
-
-        String leftStr = left.getCanonicalForm();
-        String rightStr = right.getCanonicalForm();
-
-        // 处理可交换运算符
-        if (isCommutative()) {
-            if (leftStr.compareTo(rightStr) > 0) {
-                String temp = leftStr;
-                leftStr = rightStr;
-                rightStr = temp;
-            }
-        }
-        return "(" + leftStr + operator + rightStr + ")";
+    public String getOperator() {
+        return operator;
     }
 
-    private boolean isCommutative() {
-        return operator.equals("+") || operator.equals("×");
+    public Fraction getValue() {
+        return value;
     }
 
-    // 生成带格式的题目字符串
+    public Expression getLeft() {
+        return left;
+    }
+
+    public Expression getRight() {
+        return right;
+    }
+
+    public int getOperatorCount(){
+        return operatorCount;
+    }
+
+
+
+    // 生成带格式的题目字符串(加括号是形式上的 实际计算由树结构决定)
     public String toProblemString() {
         if(isLeaf()) {
             return value.toString();
@@ -68,12 +65,18 @@ public class Expression {
         if (child.isLeaf()){
             return false;
         }
+
         // 根据运算符优先级判断是否需要括号
+        // 获取当前运算符和子节点运算符 比较优先级
         int parentPriority = getPriority(this.operator);
         int childPriority = getPriority(child.operator);
+
+        // 子节点优先级小于父节点
         if (childPriority < parentPriority){
             return true;
         }
+
+        // 子节点是右子树 + 子节点优先级与父节点优先级相等 + 父节点是减/除 时 需要括号
         if (childPriority == parentPriority) {
             if (!isLeft && ("-".equals(this.operator) || "÷".equals(this.operator))) {
                 return true;
@@ -94,8 +97,5 @@ public class Expression {
     // 判断是否是叶子节点（数值节点）
     public boolean isLeaf() {
         return operator == null;
-        // 或更严格的判断：return operator == null && left == null && right == null;
     }
-
-
 }
