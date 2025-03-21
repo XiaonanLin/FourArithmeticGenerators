@@ -22,6 +22,12 @@ public class Fraction {
             System.out.println("分母不能为零");
         }
 
+        if (numerator == 0) {
+            this.numerator = 0;
+            this.denominator = 1;
+            return;
+        }
+
         // 确保分母为正
         if (denominator < 0) {
             numerator = -numerator;

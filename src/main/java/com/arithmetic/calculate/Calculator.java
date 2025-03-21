@@ -36,7 +36,7 @@ public class Calculator {
         while (index < expression.length()) {
             char c = expression.charAt(index);
             if (Character.isDigit(c) || c == '\'' || c == '/') {
-                // 解析数字或分数
+                // 解析数字
                 StringBuilder numStr = new StringBuilder();
                 while (index < expression.length() && (Character.isDigit(c) || c == '/' || c == '\'')) {
                     numStr.append(c);
@@ -49,33 +49,42 @@ public class Calculator {
                     }
                 }
                 numStack.push(parseNumber(numStr.toString()));
-            }  else if (c == '(') {
-            opStack.push(c);
-            index++;
-        } else if (c == ')') {
-            // 修复括号处理：正确识别括号范围
-            while (opStack.peek() != '(') {
-                Fraction b = numStack.pop();
-                Fraction a = numStack.pop();
-                numStack.push(applyOp(opStack.pop(), a, b));
+            } else if (c == '(') {
+                opStack.push(c);
+                index++;
+            } else if (c == ')') {
+                while (opStack.peek() != '(') {
+                    Fraction b = numStack.pop();
+                    Fraction a = numStack.pop();
+                    numStack.push(applyOp(opStack.pop(), a, b));
+                }
+                opStack.pop();
+                index++;
+            } else if (isOperator(c)) {
+                // 强制处理高优先级运算符
+                while (comparePriority(opStack.peek(), c) >= 0) {
+                    Fraction b = numStack.pop();
+                    Fraction a = numStack.pop();
+                    numStack.push(applyOp(opStack.pop(), a, b));
+                }
+                opStack.push(c);
+                index++;
+            } else {
+                index++;
             }
-            opStack.pop(); // 弹出左括号
-            index++;
-        } else if (isOperator(c)) {
-            // 严格处理优先级（乘除左结合）
-            while (comparePriority(opStack.peek(), c) > 0) {
-                Fraction b = numStack.pop();
-                Fraction a = numStack.pop();
-                numStack.push(applyOp(opStack.pop(), a, b));
-            }
-            opStack.push(c);
-            index++;
-        } else {
-            index++;
         }
+
+        // 处理剩余运算符
+        while (opStack.peek() != '#') {
+            Fraction b = numStack.pop();
+            Fraction a = numStack.pop();
+            numStack.push(applyOp(opStack.pop(), a, b));
+        }
+
+        return numStack.pop();
     }
-    return numStack.pop();
-    }
+
+
 
     private static Fraction parseNumber(String numStr) {
         return FractionParser.parse((numStr));
@@ -111,11 +120,4 @@ public class Calculator {
             default: throw new IllegalArgumentException("未知运算符: " + op);
         }
     }
-
-    public static void main(String[] args) {
-        System.out.println(calculate("5'3/5"));      // 输出: 28/5
-        System.out.println(calculate("3/7 + 8/7"));   // 输出: 11/7
-        System.out.println(calculate("4 - (1/3×8÷(8/9))")); // 输出: 1/1
-    }
-
 }
