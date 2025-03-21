@@ -1,7 +1,7 @@
 package com.arithmetic.bean;
 
+// 运算式树类
 public class Expression {
-    private static final String[] OPS = {"+", "-", "×", "÷"};
     private final String operator;
     private final Expression left;
     private final Expression right;
@@ -53,6 +53,7 @@ public class Expression {
             return value.toString();
         }
 
+        // 需不需要加括号
         String leftStr = needBrackets(left, true) ?
                 "(" + left.toProblemString() + ")" : left.toProblemString();
         String rightStr = needBrackets(right, false) ?
@@ -77,8 +78,9 @@ public class Expression {
         }
 
         // 子节点是右子树 + 子节点优先级与父节点优先级相等 + 父节点是减/除 时 需要括号
+        // 优先级相等时 如果是减/除括号会影响运算 因为计算时左右子树需要先算 所以此时得加括号
         if (childPriority == parentPriority) {
-            if (!isLeft && ("-".equals(this.operator) || "÷".equals(this.operator))) {
+            if(!isLeft && ("-".equals(this.operator) || "÷".equals(this.operator))) {
                 return true;
             }
         }

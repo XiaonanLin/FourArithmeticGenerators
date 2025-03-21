@@ -3,13 +3,10 @@ package com.arithmetic.generate;
 import com.arithmetic.bean.Expression;
 import com.arithmetic.bean.Fraction;
 import com.arithmetic.calculate.Calculator;
-import com.arithmetic.utils.FileUtil;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Random;
 
+// 生成运算式
 public class GenerateRandomExpression {
     private static final String[] OPS = {"+", "-", "×", "÷"};
     private static final Random rand = new Random();

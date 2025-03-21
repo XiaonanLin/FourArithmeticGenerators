@@ -2,6 +2,7 @@ package com.arithmetic.bean;
 
 import java.util.Objects;
 
+// 分数类
 public class Fraction {
     //分子
     private final int numerator;
@@ -73,7 +74,7 @@ public class Fraction {
                 this.denominator * other.numerator);
     }
 
-
+    // 比较两个数大小
     public int compareTo(Fraction other) {
         long left = (long) this.numerator * other.denominator;
         long right = (long) other.numerator * this.denominator;
@@ -99,27 +100,6 @@ public class Fraction {
         return String.format("%d/%d", numerator, denominator);
     }
 
-    // 将字符串转化为分数
-    public static Fraction parse(String s) {
-        if (s.contains("'")) {
-            // 带分数
-            String[] parts = s.split("['/]");
-            int whole = Integer.parseInt(parts[0]);
-            int num = Integer.parseInt(parts[1]);
-            int den = Integer.parseInt(parts[2]);
-            return new Fraction(whole * den + num, den);
-        } else if (s.contains("/")) {
-            // 真分数
-            String[] parts = s.split("/");
-            return new Fraction(
-                    Integer.parseInt(parts[0]),
-                    Integer.parseInt(parts[1])
-            );
-        } else {
-            // 自然数
-            return new Fraction(Integer.parseInt(s));
-        }
-    }
 
     // 生成最大公约数
     private static int gcd(int a, int b) {
