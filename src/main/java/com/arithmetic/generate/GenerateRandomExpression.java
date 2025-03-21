@@ -3,7 +3,11 @@ package com.arithmetic.generate;
 import com.arithmetic.bean.Expression;
 import com.arithmetic.bean.Fraction;
 import com.arithmetic.calculate.Calculator;
+import com.arithmetic.utils.FileUtil;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Random;
 
 public class GenerateRandomExpression {
@@ -56,8 +60,8 @@ public class GenerateRandomExpression {
         // 判断是否为可交换运算符
         if(isCommutative(op)){
             // 计算左右子树的值
-            Fraction leftValue = Calculator.cauculate(left);
-            Fraction rightValue = Calculator.cauculate(right);
+            Fraction leftValue = Calculator.calculate(left);
+            Fraction rightValue = Calculator.calculate(right);
 
             // 比较值的大小（或字符串表示）
             if (leftValue.compareTo(rightValue) > 0) {
@@ -68,8 +72,8 @@ public class GenerateRandomExpression {
         }
         // 处理减法不能产生负数
         if (op.equals("-")) {
-            Fraction leftVal = Calculator.cauculate(left);
-            Fraction rightVal = Calculator.cauculate(right);
+            Fraction leftVal = Calculator.calculate(left);
+            Fraction rightVal = Calculator.calculate(right);
             if (leftVal.compareTo(rightVal) < 0) {
                 // 交换左右子树
                 Expression temp = left;
@@ -80,12 +84,24 @@ public class GenerateRandomExpression {
 
         // 处理除法必须结果为真分数
         if (op.equals("÷")) {
-            Fraction rightVal = Calculator.cauculate(right);
+            Fraction rightVal = Calculator.calculate(right);
+            // 最大重试次数
+            int maxRetries = 50;
+            // 重试次数
+            int retryCount = 0;
             // 如果右操作数是0或结果非真分数(分子大于等于分母)，重新生成右子树
-            while (rightVal.getNumerator() == 0 ||
-                    Calculator.cauculate(left).divide(rightVal).getNumerator() >= rightVal.getDenominator()) {
+            // 防止生成不出要的右子树而陷入死循环
+            while ((rightVal.getNumerator() == 0 ||
+                    Calculator.calculate(left).divide(rightVal).getNumerator() >= rightVal.getDenominator()) && retryCount < maxRetries) {
                 right = generateValueNode();
-                rightVal = Calculator.cauculate(right);
+                rightVal = Calculator.calculate(right);
+                retryCount++;
+            }
+
+            if(retryCount >= maxRetries){
+                // 返回默认右子树
+                return new Expression("÷",new Expression(new Fraction(1)),
+                        new Expression(new Fraction(1)));
             }
         }
 
@@ -107,18 +123,47 @@ public class GenerateRandomExpression {
         // 分子[0, denominator-1]
         int numerator = rand.nextInt(denominator);
 
-
         return new Expression(new Fraction(numerator, denominator));
     }
 
-    // 示例测试
     public static void main(String[] args) {
         GenerateRandomExpression generator = new GenerateRandomExpression(10);
-        for (int i = 0; i < 120; i++) {
-            Expression expr = generator.generateRandomExpression();
-            System.out.println("题目: " + expr.toProblemString());
-            System.out.println("答案: " + Calculator.cauculate(expr) + "\n");
+        StringBuilder exercises = new StringBuilder();
+        StringBuilder answers = new StringBuilder();
+
+        try{
+            for (int i = 0; i < 10000; i++) {
+                Expression expr = generator.generateRandomExpression();
+                if (expr == null) {
+                    System.out.println("第 " + (i + 1) + " 个表达式生成失败");
+                    continue;
+                }
+
+                String problem = expr.toProblemString();
+                Fraction answer = Calculator.calculate(expr);
+
+                // 添加题目到 exercises
+                exercises.append(i + 1)
+                        .append(". ")
+                        .append(problem)
+                        .append("\n");
+
+                // 添加答案到 answers
+                answers.append(i + 1)
+                        .append(". ")
+                        .append(answer)
+                        .append("\n");
+                }
+
+
+            FileUtil.write("Exercises.txt", exercises.toString());
+            FileUtil.write("Answers.txt", answers.toString());
+            System.out.println("文件生成成功！");
+        }catch (IOException e){
+            System.err.println("文件写入失败: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
 
 }

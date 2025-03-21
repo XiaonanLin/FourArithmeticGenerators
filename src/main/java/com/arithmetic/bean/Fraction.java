@@ -134,10 +134,9 @@ public class Fraction {
             return false;
         }
 
-        // 比较分子和分母
-        Fraction fraction = (Fraction) o;
-        return numerator == fraction.numerator
-                && denominator == fraction.denominator;
+        Fraction other = (Fraction) o;
+        // 交叉相乘比较值是否相等（如 3/3 和 1/1 视为相等）
+        return this.numerator * other.denominator == this.denominator * other.numerator;
     }
 
     @Override
