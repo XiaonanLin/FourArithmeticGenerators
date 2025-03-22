@@ -42,7 +42,7 @@ public class main {
             for (int i = 1; i <= n; i++) {
                 // 生成
                 Expression expr = gen.generateRandomExpression();
-                ex.append(i).append(". ").append(expr.toProblemString()).append("\n");
+                ex.append(i).append(". ").append(expr.toProblemString()).append(" =\n");
                 ans.append(i).append(". ").append(Calculator.calculate(expr)).append("\n");
             }
 

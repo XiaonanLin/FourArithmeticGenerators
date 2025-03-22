@@ -20,7 +20,7 @@ public class Fraction {
 
     public Fraction(int numerator, int denominator) {
         if (denominator == 0) {
-            System.out.println("分母不能为零");
+            throw new IllegalArgumentException("分母不能为零");
         }
 
         if (numerator == 0) {

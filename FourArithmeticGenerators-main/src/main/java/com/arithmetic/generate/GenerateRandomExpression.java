@@ -26,14 +26,23 @@ public class GenerateRandomExpression {
 
     public Expression generateRandomExpression() {
         Expression expr;
-        String exprStr;
+        String exprStr = null;
         int retryCount = 0;
 
         do {
-            expr = generateOperatorNode(maxOperators - 1);
-            exprStr = expr.toProblemString();
+            try {
+                expr = generateOperatorNode(maxOperators - 1);
+                exprStr = expr.toProblemString();
+            } catch (IllegalArgumentException e) {
+                // 捕获分母为零异常后重新生成
+                System.err.println("生成失败，正在重试: " + e.getMessage());
+                expr = null;
+                retryCount++;
+                continue;
+            }
             retryCount++;
-        } while (generatedExpressions.contains(exprStr) && retryCount < 20); // 最多重试20次
+        } while ((generatedExpressions.contains(exprStr) || expr == null)
+                && retryCount < 20);
 
         generatedExpressions.add(exprStr);
         return expr;
@@ -98,5 +107,4 @@ public class GenerateRandomExpression {
         int denominator = rand.nextInt(maxNumber - 1) + 2; // 分母范围2~maxNumber
         int numerator = rand.nextInt(denominator - 1) + 1;  // 分子范围1~denominator-1
         return new Fraction(numerator, denominator);
-    }
-}
+    }}
